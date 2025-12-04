@@ -21,35 +21,35 @@ Hệ thống dự đoán nguy cơ mắc bệnh tim mạch dựa trên các chỉ
 ---
 
 ## Giới thiệu
-[cite_start]Bệnh tim mạch là nguyên nhân gây tử vong hàng đầu thế giới. Việc chẩn đoán sớm đóng vai trò quan trọng trong điều trị. Dự án này xây dựng một hệ thống hỗ trợ ra quyết định (CDSS) giúp các bác sĩ hoặc người dùng cá nhân đánh giá nhanh nguy cơ dựa trên các thông số như tuổi, cholesterol, huyết áp, v.v.
+ Bệnh tim mạch là nguyên nhân gây tử vong hàng đầu thế giới. Việc chẩn đoán sớm đóng vai trò quan trọng trong điều trị. Dự án này xây dựng một hệ thống hỗ trợ ra quyết định (CDSS) giúp các bác sĩ hoặc người dùng cá nhân đánh giá nhanh nguy cơ dựa trên các thông số như tuổi, cholesterol, huyết áp, v.v.
 
 ## Cơ sở Lý thuyết & Phương pháp
 
 ### 1. Bộ dữ liệu
-[cite_start]Dự án sử dụng bộ dữ liệu **Cleveland Heart Disease** từ UCI Machine Learning Repository.
+ Dự án sử dụng bộ dữ liệu **Cleveland Heart Disease** từ UCI Machine Learning Repository.
 - **Kích thước:** 303 bản ghi.
-- [cite_start]**Đặc trưng (Features):** 13 đặc trưng lâm sàng (Tuổi, Giới tính, CP, Trestbps, Chol, FBS, Restecg, Thalach, Exang, Oldpeak, Slope, CA, Thal).
+- **Đặc trưng (Features):** 13 đặc trưng lâm sàng (Tuổi, Giới tính, CP, Trestbps, Chol, FBS, Restecg, Thalach, Exang, Oldpeak, Slope, CA, Thal).
 - **Nhãn (Target):** 0 (Không bệnh) và 1 (Có bệnh).
 
 ### 2. Feature Engineering (Kỹ thuật đặc trưng)
-[cite_start]Thay vì chỉ sử dụng dữ liệu thô, dự án áp dụng kỹ thuật Feature Engineering để tạo ra các đặc trưng mới nhằm làm nổi bật tín hiệu và cải thiện khả năng học của mô hình. Các đặc trưng mới được tạo ra bao gồm:
+ Thay vì chỉ sử dụng dữ liệu thô, dự án áp dụng kỹ thuật Feature Engineering để tạo ra các đặc trưng mới nhằm làm nổi bật tín hiệu và cải thiện khả năng học của mô hình. Các đặc trưng mới được tạo ra bao gồm:
 
-* **Cholesterol per Age (`chol_per_age`):** Tỷ lệ Cholesterol trên tuổi. [cite_start]Phản ánh mức độ tích tụ mỡ máu tương đối theo độ lão hóa[cite: 424].
-* [cite_start]**Blood Pressure per Age (`bps_per_age`):** Tỷ lệ Huyết áp tâm thu trên tuổi.
-* [cite_start]**Heart Rate Ratio (`hr_ratio`):** Tỷ lệ Nhịp tim tối đa trên tuổi.
-* [cite_start]**Age Bining:** Phân nhóm độ tuổi để xử lý tốt hơn các xu hướng phi tuyến tính.
+* **Cholesterol per Age (`chol_per_age`):** Tỷ lệ Cholesterol trên tuổi.  Phản ánh mức độ tích tụ mỡ máu tương đối theo độ lão hóa[cite: 424].
+*  **Blood Pressure per Age (`bps_per_age`):** Tỷ lệ Huyết áp tâm thu trên tuổi.
+*  **Heart Rate Ratio (`hr_ratio`):** Tỷ lệ Nhịp tim tối đa trên tuổi.
+*  **Age Bining:** Phân nhóm độ tuổi để xử lý tốt hơn các xu hướng phi tuyến tính.
 
-[cite_start]Kết quả thực nghiệm cho thấy việc áp dụng Feature Engineering giúp tăng độ chính xác đáng kể so với dữ liệu gốc (từ ~84% lên ~90-93% trên tập test).
+ Kết quả thực nghiệm cho thấy việc áp dụng Feature Engineering giúp tăng độ chính xác đáng kể so với dữ liệu gốc (từ ~84% lên ~90-93% trên tập test).
 
 ### 3. Mô hình Stacking Ensemble
-Để tối ưu hóa hiệu suất, dự án sử dụng kỹ thuật **Ensemble Learning** dạng **Stacking**. [cite_start]Đây là phương pháp kết hợp sức mạnh của nhiều mô hình cơ sở để giảm sai số và tăng độ ổn định.
+Để tối ưu hóa hiệu suất, dự án sử dụng kỹ thuật **Ensemble Learning** dạng **Stacking**.  Đây là phương pháp kết hợp sức mạnh của nhiều mô hình cơ sở để giảm sai số và tăng độ ổn định.
 Kiến trúc mô hình bao gồm:
 1.  **Level-0 (Base Learners):**
-    * **K-Nearest Neighbors (KNN):** Dựa trên khoảng cách giữa các điểm dữ liệu. [cite_start]K tối ưu được chọn thông qua Cross-Validation (~11).
-    * [cite_start]**Decision Tree (DT):** Mô hình cây quyết định với độ sâu giới hạn để tránh overfitting.
-    * [cite_start]**Naive Bayes (NB):** Dựa trên định lý Bayes với giả định các đặc trưng độc lập.
+    * **K-Nearest Neighbors (KNN):** Dựa trên khoảng cách giữa các điểm dữ liệu.  K tối ưu được chọn thông qua Cross-Validation (~11).
+    *  **Decision Tree (DT):** Mô hình cây quyết định với độ sâu giới hạn để tránh overfitting.
+    *  **Naive Bayes (NB):** Dựa trên định lý Bayes với giả định các đặc trưng độc lập.
 2.  **Level-1 (Meta Learner):**
-    * [cite_start]Sử dụng **KNN** để tổng hợp kết quả dự đoán (xác suất) từ các mô hình Level-0 và đưa ra kết quả cuối cùng.
+    *  Sử dụng **KNN** để tổng hợp kết quả dự đoán (xác suất) từ các mô hình Level-0 và đưa ra kết quả cuối cùng.
 
 ---
 
