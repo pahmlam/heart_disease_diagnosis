@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự đoán bệnh tim (AIO 2025)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding-top: 20px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: none; border-radius: 10px; }
+        .card-header { background: linear-gradient(135deg, #0d6efd, #0a58ca); color: white; border-radius: 10px 10px 0 0 !important; }
+        
+        /* Style cho phần kết quả */
+        .result-box { display: none; margin-top: 25px; padding: 20px; border-radius: 8px; animation: fadeIn 0.5s; }
+        .result-safe { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .result-danger { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        
+        /* Style cho bảng Feature Engineering */
+        .fe-box { background-color: #fff; border-radius: 8px; padding: 15px; margin-top: 15px; border: 1px solid #dee2e6; }
+        .fe-title { font-size: 0.9em; text-transform: uppercase; color: #6c757d; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header text-center py-3">
+                        <h3 class="mb-1">Dự đoán nguy cơ bệnh tim</h3>
+                        <p class="mb-0 small opacity-75">Hệ thống hỗ trợ chẩn đoán với Feature Engineering</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="predictionForm">
+                            <div class="row g-3">
+                                <div class="col-md-6"><label class="form-label">Tuổi</label><input type="number" class="form-control" name="age" required value="58"></div>
+                                <div class="col-md-6"><label class="form-label">Giới tính</label><select class="form-select" name="sex"><option value="1">Nam</option><option value="0">Nữ</option></select></div>
+                                <div class="col-md-6"><label class="form-label">Huyết áp nghỉ (trestbps)</label><input type="number" class="form-control" name="trestbps" required value="120"></div>
+                                <div class="col-md-6"><label class="form-label">Cholesterol (chol)</label><input type="number" class="form-control" name="chol" required value="240"></div>
+                                <div class="col-md-6"><label class="form-label">Nhịp tim tối đa (thalach)</label><input type="number" class="form-control" name="thalach" required value="150"></div>
+                                <div class="col-md-6"><label class="form-label">Đường huyết > 120 (fbs)</label><select class="form-select" name="fbs"><option value="0">Sai</option><option value="1">Đúng</option></select></div>
+                                <div class="col-md-12"><label class="form-label">Loại đau ngực (cp)</label><select class="form-select" name="cp"><option value="1">Điển hình</option><option value="2">Không điển hình</option><option value="3">Không do tim</option><option value="4">Không triệu chứng</option></select></div>
+                                <div class="col-md-6"><label class="form-label">Đau ngực khi tập (exang)</label><select class="form-select" name="exang"><option value="0">Không</option><option value="1">Có</option></select></div>
+                                <div class="col-md-6"><label class="form-label">Điện tâm đồ (restecg)</label><select class="form-select" name="restecg"><option value="0">Bình thường</option><option value="1">Bất thường ST-T</option><option value="2">Phì đại thất trái</option></select></div>
+                                <div class="col-md-4"><label class="form-label">Oldpeak</label><input type="number" step="0.1" class="form-control" name="oldpeak" required value="1.0"></div>
+                                <div class="col-md-4"><label class="form-label">Slope</label><select class="form-select" name="slope"><option value="1">Dốc lên</option><option value="2">Bằng phẳng</option><option value="3">Dốc xuống</option></select></div>
+                                <div class="col-md-4"><label class="form-label">Số mạch máu (ca)</label><select class="form-select" name="ca"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                                <div class="col-md-12"><label class="form-label">Thalassemia (thal)</label><select class="form-select" name="thal"><option value="3">Bình thường</option><option value="6">Tổn thương cố định</option><option value="7">Đảo ngược</option></select></div>
+                            </div>
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">Phân tích & Dự đoán</button>
+                            </div>
+                        </form>
+
+                        <div id="resultBox" class="result-box">
+                            <h4 class="text-center mb-3" id="resultText"></h4>
+                            <div class="progress mb-3" style="height: 25px;">
+                                <div id="confidenceBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <p class="text-center text-muted" id="confidenceText"></p>
+                            
+                            <div class="fe-box">
+                                <div class="fe-title">Phân tích chuyên sâu (Feature Engineering)</div>
+                                <p class="small text-muted mb-2"><i>Các chỉ số dẫn xuất được tính toán từ dữ liệu gốc để tăng độ chính xác:</i></p>
+                                <div class="row text-center">
+                                    <div class="col-4 border-end">
+                                        <div class="fw-bold text-primary" id="val_chol_age">-</div>
+                                        <small>Cholesterol / Tuổi</small>
+                                    </div>
+                                    <div class="col-4 border-end">
+                                        <div class="fw-bold text-primary" id="val_bps_age">-</div>
+                                        <small>Huyết áp / Tuổi</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="fw-bold text-primary" id="val_hr_ratio">-</div>
+                                        <small>Nhịp tim / Tuổi</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Lấy dữ liệu
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            for (let key in data) data[key] = parseFloat(data[key]); 
+
+            // UI Loading
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Đang xử lý...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) throw new Error("Lỗi API");
+
+                const result = await response.json();
+                
+                // Hiển thị Box kết quả
+                const resultBox = document.getElementById('resultBox');
+                resultBox.style.display = 'block';
+                resultBox.className = 'result-box ' + (result.prediction === 1 ? 'result-danger' : 'result-safe');
+
+                // Cập nhật text kết quả
+                document.getElementById('resultText').innerText = result.prediction === 1 ? "CẢNH BÁO: " + result.result_text : "KẾT QUẢ: " + result.result_text;
+                
+                // Cập nhật thanh độ tin cậy
+                const bar = document.getElementById('confidenceBar');
+                bar.style.width = result.confidence + "%";
+                bar.innerText = result.confidence + "%";
+                bar.className = "progress-bar " + (result.prediction === 1 ? "bg-danger" : "bg-success");
+                document.getElementById('confidenceText').innerText = `Mô hình chắc chắn ${result.confidence}% về kết quả này.`;
+
+                // CẬP NHẬT FEATURE ENGINEERING 
+                const fe = result.features_engineering;
+                document.getElementById('val_chol_age').innerText = fe.chol_per_age;
+                document.getElementById('val_bps_age').innerText = fe.bps_per_age;
+                document.getElementById('val_hr_ratio').innerText = fe.hr_ratio;
+
+            } catch (error) {
+                alert("Lỗi: " + error.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
