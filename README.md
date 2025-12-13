@@ -1,126 +1,182 @@
+
+---
+
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.95%2B-green)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.2%2B-orange)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5-purple)
 
-Hệ thống dự đoán nguy cơ mắc bệnh tim mạch dựa trên các chỉ số y tế lâm sàng. Dự án sử dụng kỹ thuật **Machine Learning (Stacking Ensemble)** kết hợp với **Feature Engineering** để đạt độ chính xác cao nhất, được triển khai dưới dạng Web API với giao diện người dùng thân thiện.
+# ❤️ Cardiovascular Disease Risk Prediction System
+
+A **clinical decision support system (CDSS)** for predicting the risk of **cardiovascular disease** based on clinical medical indicators.
+The project leverages **Machine Learning (Stacking Ensemble)** combined with **Feature Engineering** to maximize predictive performance and is deployed as a **RESTful Web API** with a user-friendly frontend interface.
 
 ---
 
-## 📑 Mục lục
-- [Giới thiệu](#giới-thiệu)
-- [Cơ sở Lý thuyết & Phương pháp](#cơ-sở-lý-thuyết--phương-pháp)
-  - [1. Bộ dữ liệu](#1-bộ-dữ-liệu)
-  - [2. Feature Engineering (Kỹ thuật đặc trưng)](#2-feature-engineering-kỹ-thuật-đặc-trưng)
-  - [3. Mô hình Stacking Ensemble](#3-mô-hình-stacking-ensemble)
-- [Cấu trúc Dự án](#cấu-trúc-dự-án)
-- [Cài đặt & Hướng dẫn sử dụng](#cài-đặt--hướng-dẫn-sử-dụng)
-- [API Documentation](#api-documentation)
-- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
+## 📑 Table of Contents
+
+* [Introduction](#introduction)
+* [Theory & Methodology](#theory--methodology)
+
+  * [1. Dataset](#1-dataset)
+  * [2. Feature Engineering](#2-feature-engineering)
+  * [3. Stacking Ensemble Model](#3-stacking-ensemble-model)
+* [Project Structure](#project-structure)
+* [Installation & Usage](#installation--usage)
+* [API Documentation](#api-documentation)
+* [Technologies Used](#technologies-used)
 
 ---
 
-## Giới thiệu
- Bệnh tim mạch là nguyên nhân gây tử vong hàng đầu thế giới. Việc chẩn đoán sớm đóng vai trò quan trọng trong điều trị. Dự án này xây dựng một hệ thống hỗ trợ ra quyết định (CDSS) giúp các bác sĩ hoặc người dùng cá nhân đánh giá nhanh nguy cơ dựa trên các thông số như tuổi, cholesterol, huyết áp, v.v.
+## Introduction
 
-## Cơ sở Lý thuyết & Phương pháp
-
-### 1. Bộ dữ liệu
- Dự án sử dụng bộ dữ liệu **Cleveland Heart Disease** từ UCI Machine Learning Repository.
-- **Kích thước:** 303 bản ghi.
-- **Đặc trưng (Features):** 13 đặc trưng lâm sàng (Tuổi, Giới tính, CP, Trestbps, Chol, FBS, Restecg, Thalach, Exang, Oldpeak, Slope, CA, Thal).
-- **Nhãn (Target):** 0 (Không bệnh) và 1 (Có bệnh).
-
-### 2. Feature Engineering (Kỹ thuật đặc trưng)
- Thay vì chỉ sử dụng dữ liệu thô, dự án áp dụng kỹ thuật Feature Engineering để tạo ra các đặc trưng mới nhằm làm nổi bật tín hiệu và cải thiện khả năng học của mô hình. Các đặc trưng mới được tạo ra bao gồm:
-
-* **Cholesterol per Age (`chol_per_age`):** Tỷ lệ Cholesterol trên tuổi.  Phản ánh mức độ tích tụ mỡ máu tương đối theo độ lão hóa[cite: 424].
-*  **Blood Pressure per Age (`bps_per_age`):** Tỷ lệ Huyết áp tâm thu trên tuổi.
-*  **Heart Rate Ratio (`hr_ratio`):** Tỷ lệ Nhịp tim tối đa trên tuổi.
-*  **Age Bining:** Phân nhóm độ tuổi để xử lý tốt hơn các xu hướng phi tuyến tính.
-
- Kết quả thực nghiệm cho thấy việc áp dụng Feature Engineering giúp tăng độ chính xác đáng kể so với dữ liệu gốc (từ ~84% lên ~90-93% trên tập test).
-
-### 3. Mô hình Stacking Ensemble
-Để tối ưu hóa hiệu suất, dự án sử dụng kỹ thuật **Ensemble Learning** dạng **Stacking**.  Đây là phương pháp kết hợp sức mạnh của nhiều mô hình cơ sở để giảm sai số và tăng độ ổn định.
-Kiến trúc mô hình bao gồm:
-1.  **Level-0 (Base Learners):**
-    * **K-Nearest Neighbors (KNN):** Dựa trên khoảng cách giữa các điểm dữ liệu.  K tối ưu được chọn thông qua Cross-Validation (~11).
-    *  **Decision Tree (DT):** Mô hình cây quyết định với độ sâu giới hạn để tránh overfitting.
-    *  **Naive Bayes (NB):** Dựa trên định lý Bayes với giả định các đặc trưng độc lập.
-2.  **Level-1 (Meta Learner):**
-    *  Sử dụng **KNN** để tổng hợp kết quả dự đoán (xác suất) từ các mô hình Level-0 và đưa ra kết quả cuối cùng.
+Cardiovascular disease is one of the leading causes of mortality worldwide. Early diagnosis plays a crucial role in effective treatment and prevention.
+This project aims to build a **machine learning–based decision support system** that enables clinicians or individual users to quickly assess heart disease risk using key medical attributes such as age, cholesterol level, blood pressure, and more.
 
 ---
 
-## Cấu trúc Dự án
+## Theory & Methodology
+
+### 1. Dataset
+
+The project uses the **Cleveland Heart Disease Dataset** from the **UCI Machine Learning Repository**.
+
+* **Size:** 303 samples
+* **Features:** 13 clinical attributes
+  (Age, Sex, Chest Pain Type, Resting Blood Pressure, Cholesterol, Fasting Blood Sugar, Rest ECG, Max Heart Rate, Exercise-Induced Angina, Oldpeak, Slope, CA, Thal)
+* **Target Variable:**
+
+  * `0` — No heart disease
+  * `1` — Presence of heart disease
+
+---
+
+### 2. Feature Engineering
+
+Instead of relying solely on raw clinical data, this project applies **Feature Engineering** to create additional informative features that enhance signal extraction and model learning capacity.
+
+Newly engineered features include:
+
+* **Cholesterol per Age (`chol_per_age`)**
+  Ratio of cholesterol level to age, reflecting relative lipid accumulation with aging.
+* **Blood Pressure per Age (`bps_per_age`)**
+  Ratio of resting systolic blood pressure to age.
+* **Heart Rate Ratio (`hr_ratio`)**
+  Ratio of maximum heart rate to age.
+* **Age Binning**
+  Discretization of age into groups to better capture non-linear trends.
+
+📈 **Experimental results** show that Feature Engineering improves test accuracy significantly—from approximately **84%** (raw features) to **90–93%** after enhancement.
+
+---
+
+### 3. Stacking Ensemble Model
+
+To achieve optimal performance and robustness, the system employs **Ensemble Learning** using the **Stacking** strategy.
+Stacking combines multiple base learners to reduce bias and variance while improving generalization.
+
+#### Model Architecture
+
+**Level-0 (Base Learners):**
+
+* **K-Nearest Neighbors (KNN)**
+  Distance-based classifier with optimal `k ≈ 11`, selected via cross-validation.
+* **Decision Tree (DT)**
+  Depth-limited decision tree to prevent overfitting.
+* **Naive Bayes (NB)**
+  Probabilistic classifier based on Bayes’ theorem with feature independence assumptions.
+
+**Level-1 (Meta Learner):**
+
+* **KNN Classifier**
+  Aggregates probability outputs from base learners to produce the final prediction.
+
+---
+
+## Project Structure
+
 ```bash
 heart_disease_project/
 ├── data/
-│   └── cleveland.csv      # Dữ liệu gốc
+│   └── cleveland.csv        # Raw dataset
 ├── model/
-│   └── heart_model.pkl    # Pipeline mô hình đã huấn luyện (bao gồm cả xử lý dữ liệu)
-├── main.py                # Backend API (FastAPI)
-├── train.py               # Script huấn luyện mô hình & Feature Engineering
-├── index.html             # Giao diện người dùng (Frontend)
-├── requirements.txt       # Danh sách thư viện
-└── README.md              # Tài liệu dự án
-````
+│   └── heart_model.pkl      # Trained model pipeline (incl. preprocessing)
+├── main.py                  # FastAPI backend
+├── train.py                 # Model training & feature engineering
+├── index.html               # Frontend UI
+├── requirements.txt         # Dependencies
+└── README.md                # Documentation
+```
 
------
+---
 
-## Cài đặt & Hướng dẫn sử dụng
+## Installation & Usage
 
-### Bước 1: Clone và cài đặt môi trường
+### Step 1: Clone Repository & Setup Environment
 
 ```bash
-# Clone dự án (nếu có git)
 git clone <your-repo-url>
 cd heart_disease_project
 
-# Tạo môi trường ảo (Khuyên dùng)
+# Create virtual environment (recommended)
 python -m venv venv
-# Windows:
+
+# Windows
 venv\Scripts\activate
-# Mac/Linux:
+
+# macOS / Linux
 source venv/bin/activate
 
-# Cài đặt thư viện
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### Bước 2: Huấn luyện mô hình
+---
 
-Trước khi chạy ứng dụng, bạn cần huấn luyện mô hình để tạo file `heart_model.pkl`. Quá trình này bao gồm cả bước tiền xử lý và Feature Engineering tự động.
+### Step 2: Train the Model
+
+Before running the application, train the model to generate `heart_model.pkl`.
+This process includes **data preprocessing, feature engineering, and model stacking**.
 
 ```bash
 python train.py
 ```
 
-*Output mong đợi: `Độ chính xác trên tập test: 0.9xxx` và thông báo đã lưu model.*
+Expected output:
 
-### Bước 3: Khởi chạy Server
+```
+Test Accuracy: 0.9xxx
+Model saved successfully.
+```
+
+---
+
+### Step 3: Start the Backend Server
 
 ```bash
 python main.py
 ```
 
-Server sẽ khởi động tại `http://127.0.0.1:8000`.
+The API server will run at:
+`http://127.0.0.1:8000`
 
-### Bước 4: Sử dụng Giao diện
+---
 
-Mở file `index.html` bằng trình duyệt bất kỳ (Chrome, Firefox, Edge). Nhập các chỉ số sức khỏe và nhấn **"Dự đoán ngay"**.
+### Step 4: Use the Frontend Interface
 
------
+Open `index.html` in any modern browser (Chrome, Firefox, Edge).
+Enter clinical indicators and click **“Predict Now”** to obtain results.
+
+---
 
 ## API Documentation
 
 ### Endpoint: `/predict`
 
-  * **Method:** `POST`
-  * **Description:** Nhận dữ liệu lâm sàng và trả về dự đoán nguy cơ bệnh tim cùng các chỉ số phân tích.
+* **Method:** `POST`
+* **Description:** Receives clinical data and returns heart disease risk prediction with confidence score.
 
-**Request Body (JSON):**
+### Request Body (JSON)
 
 ```json
 {
@@ -140,14 +196,14 @@ Mở file `index.html` bằng trình duyệt bất kỳ (Chrome, Firefox, Edge).
 }
 ```
 
-**Response (JSON):**
+### Response (JSON)
 
 ```json
 {
   "prediction": 1,
-  "result_text": "Có nguy cơ bệnh tim",
+  "result_text": "High risk of heart disease",
   "confidence": 85.5,
-  "features_engineering": {
+  "features_engineered": {
     "chol_per_age": 3.698,
     "bps_per_age": 2.301,
     "hr_ratio": 2.381
@@ -155,18 +211,14 @@ Mở file `index.html` bằng trình duyệt bất kỳ (Chrome, Firefox, Edge).
 }
 ```
 
------
+---
 
-## Công nghệ sử dụng
+## Technologies Used
 
-  * **Ngôn ngữ:** Python 3.9+
-  * **Data Processing:** Pandas, NumPy
-  * **Machine Learning:** Scikit-learn (Pipeline, StackingClassifier, Imputer)
-  * **Backend:** FastAPI, Uvicorn
-  * **Frontend:** HTML5, Bootstrap 5, JavaScript (Fetch API)
+* **Language:** Python 3.9+
+* **Data Processing:** Pandas, NumPy
+* **Machine Learning:** Scikit-learn (Pipeline, StackingClassifier, Imputer)
+* **Backend:** FastAPI, Uvicorn
+* **Frontend:** HTML5, Bootstrap 5, JavaScript (Fetch API)
 
------
-
-
-<!-- end list -->
-
+---
